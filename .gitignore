@@ -24,3 +24,7 @@ topex-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+
+topex.conf
+burrito_out
+.vscode
