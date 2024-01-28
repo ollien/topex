@@ -14,7 +14,7 @@ its dependencies are installed (notably `zig` and `xz`). You can build the outpu
 `MIX_ENV=prod mix release`.
 
 ## Usage
-Topex requires a configuration file of the form
+Topex requires a configuration file (located at `./topex.conf`) of the form
 
 ```toml
 [[keys]]
