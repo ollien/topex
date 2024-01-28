@@ -1,12 +1,27 @@
 defmodule Topex.TOTP do
   alias Topex.HOTP
 
-  # TODO: handle decoded keys
-  @spec generate_code(String.t()) :: {:ok, String.t()} | {:error, any}
-  def generate_code(key) do
+  # TODO: Make these configurable
+  @period_length 30
+  @num_digits 6
+
+  @spec code(key :: String.t()) :: {:ok, String.t()} | {:error, :badkey | {:encode, any()}}
+  def code(key) do
     with {:ok, key} <- decode_key(key),
          {:ok, code} <- code_from_decoded_key(key) do
       {:ok, code}
+    end
+  end
+
+  @spec code_from_decoded_key(key :: binary()) :: {:ok, String.t()} | {:error, {:encode, any()}}
+  defp code_from_decoded_key(key) do
+    counter = counter_value()
+    case HOTP.hotp(key, counter, num_digits: @num_digits) do
+      {:ok, hotp_val} ->
+        {:ok, stringify_code(hotp_val, @num_digits)}
+
+      err = {:error, _reason} ->
+        err
     end
   end
 
@@ -21,24 +36,11 @@ defmodule Topex.TOTP do
     end
   end
 
-  @spec code_from_decoded_key(binary()) :: {:ok, binary()} | {:error, {:encode, any()}}
-  defp code_from_decoded_key(key) do
-    counter = counter_value()
-    num_digits = 6
-
-    case HOTP.hotp(key, counter, num_digits: num_digits) do
-      {:ok, hotp_val} ->
-        {:ok, stringify_code(hotp_val, num_digits)}
-
-      err = {:error, _reason} ->
-        err
-    end
-  end
-
   @spec counter_value() :: integer()
   defp counter_value() do
     t0 = 0
-    tx = 30
+    tx = @period_length
+
     now = DateTime.utc_now() |> DateTime.to_unix()
 
     div(now - t0, tx)
