@@ -1,20 +1,24 @@
 defmodule Topex.HOTP do
-  @spec hotp(binary(), integer()) :: {:ok, integer()} | {:error, {:encode, any()}}
-  def hotp(key, counter) do
+  @type hotp_option :: {:num_digits, integer()}
+
+  @spec hotp(key :: binary(), counter :: integer(), opts :: [hotp_option]) ::
+          {:ok, integer()} | {:error, {:encode, any()}}
+  def hotp(key, counter, opts \\ []) do
     with {:ok, mac} <- hmac(key, counter),
-         mac <- from_sha_hmac(mac) do
+         mac <- from_sha_hmac(mac, opts) do
       {:ok, mac}
     end
   end
 
-  @spec from_sha_hmac(binary()) :: integer()
-  def from_sha_hmac(mac) do
+  @spec from_sha_hmac(mac :: binary(), opts :: [hotp_option]) :: integer()
+  def from_sha_hmac(mac, opts \\ []) do
+    num_digits = Keyword.get(opts, :num_digits, 6)
     offset = least_significant_nibble(mac)
 
     <<_head::binary-size(offset), _msb::size(1), truncated::unsigned-big-integer-size(31),
       _tail::bits>> = mac
 
-    truncated |> rem(Integer.pow(10, 6))
+    truncated |> rem(Integer.pow(10, num_digits))
   end
 
   @spec hmac(binary(), integer()) :: {:ok, binary()} | {:error, {:encode, any()}}

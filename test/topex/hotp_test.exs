@@ -25,4 +25,15 @@ defmodule TopexTest.HOTP do
 
     assert hotp_value == 205_718
   end
+
+  test "Allows adjusting of number of digits" do
+    # Sample key from google authenticator
+    key = Base.decode32!("JBSWY3DPEHPK3PXP")
+    # Some counter value I could observe
+    counter = 56_880_192
+
+    {:ok, hotp_value} = HOTP.hotp(key, counter, num_digits: 8)
+
+    assert hotp_value == 74_560_522
+  end
 end

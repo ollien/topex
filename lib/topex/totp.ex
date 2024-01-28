@@ -21,14 +21,14 @@ defmodule Topex.TOTP do
     end
   end
 
-  # @spec code_from_decoded_key(binary()) :: {:ok, binary()} | {:error, {:encode, any()}}
+  @spec code_from_decoded_key(binary()) :: {:ok, binary()} | {:error, {:encode, any()}}
   defp code_from_decoded_key(key) do
     counter = counter_value()
+    num_digits = 6
 
-    case HOTP.hotp(key, counter) do
+    case HOTP.hotp(key, counter, num_digits: num_digits) do
       {:ok, hotp_val} ->
-        code = Integer.to_string(hotp_val) |> String.pad_leading(6, "0")
-        {:ok, code}
+        {:ok, stringify_code(hotp_val, num_digits)}
 
       err = {:error, _reason} ->
         err
@@ -42,5 +42,11 @@ defmodule Topex.TOTP do
     now = DateTime.utc_now() |> DateTime.to_unix()
 
     div(now - t0, tx)
+  end
+
+  @spec stringify_code(integer(), number()) :: String.t()
+  defp stringify_code(code, length) do
+    Integer.to_string(code)
+    |> String.pad_leading(length, "0")
   end
 end
