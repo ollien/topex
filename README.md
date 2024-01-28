@@ -1,21 +1,30 @@
 # Topex
 
-**TODO: Add description**
+A small TOTP-generating application.
 
-## Installation
+## Why?
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `topex` to your list of dependencies in `mix.exs`:
+Mostly because I wanted to implement the TOTP algorithm for fun. I probably wouldn't use this in any security-sensitive
+contexts.
 
-```elixir
-def deps do
-  [
-    {:topex, "~> 0.1.0"}
-  ]
-end
+## Building
+
+The CLI application uses [Burrito](https://github.com/burrito-elixir/burrito) to package itself, so you should ensure
+its dependencies are installed (notably `zig` and `xz`). You can build the output binary with
+`MIX_ENV=prod mix release`.
+
+## Usage
+Topex requires a configuration file of the form
+
+```toml
+[[keys]]
+name = "account1"
+key = "JBSWY3DPEHPK3PXP"
+
+[[keys]]
+name = "account2"
+key = "PXP3KPHEPD3YWSBJ"
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/topex>.
-
+You can then generate a code using `./topex [key_name]`. Note that this argument is only optional if there is only one
+key present. If not, you must specify the TOTP key you want to use to generate the code.
