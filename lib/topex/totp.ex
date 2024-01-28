@@ -5,17 +5,23 @@ defmodule Topex.TOTP do
   @period_length 30
   @num_digits 6
 
-  @spec code(key :: String.t()) :: {:ok, String.t()} | {:error, :badkey | {:encode, any()}}
-  def code(key) do
+  @type code_opt :: {:time, DateTime.t()}
+
+  @spec code(key :: String.t(), opts :: list(code_opt)) ::
+          {:ok, String.t()} | {:error, :badkey | {:encode, any()}}
+  def code(key, opts \\ []) do
     with {:ok, key} <- decode_key(key),
-         {:ok, code} <- code_from_decoded_key(key) do
+         {:ok, code} <- code_from_decoded_key(key, opts) do
       {:ok, code}
     end
   end
 
-  @spec code_from_decoded_key(key :: binary()) :: {:ok, String.t()} | {:error, {:encode, any()}}
-  def code_from_decoded_key(key) do
-    counter = counter_value()
+  @spec code_from_decoded_key(key :: binary(), opts :: list(code_opt)) ::
+          {:ok, String.t()} | {:error, {:encode, any()}}
+  def code_from_decoded_key(key, opts \\ []) do
+    time = Keyword.get_lazy(opts, :time, &DateTime.utc_now/0)
+    counter = counter_value(time)
+
     case HOTP.hotp(key, counter, num_digits: @num_digits) do
       {:ok, hotp_val} ->
         {:ok, stringify_code(hotp_val, @num_digits)}
@@ -36,14 +42,14 @@ defmodule Topex.TOTP do
     end
   end
 
-  @spec counter_value() :: integer()
-  defp counter_value() do
+  @spec counter_value(DateTime.t()) :: integer()
+  defp counter_value(time) do
     t0 = 0
     tx = @period_length
 
-    now = DateTime.utc_now() |> DateTime.to_unix()
+    unix_time = DateTime.to_unix(time)
 
-    div(now - t0, tx)
+    div(unix_time - t0, tx)
   end
 
   @spec stringify_code(integer(), number()) :: String.t()

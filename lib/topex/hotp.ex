@@ -1,7 +1,7 @@
 defmodule Topex.HOTP do
   @type hotp_option :: {:num_digits, integer()}
 
-  @spec hotp(key :: binary(), counter :: integer(), opts :: [hotp_option]) ::
+  @spec hotp(key :: binary(), counter :: integer(), opts :: list(hotp_option)) ::
           {:ok, integer()} | {:error, {:encode, any()}}
   def hotp(key, counter, opts \\ []) do
     with {:ok, mac} <- hmac(key, counter),

@@ -2,7 +2,7 @@ defmodule TopexTest.HOTP do
   alias Topex.HOTP
 
   use ExUnit.Case
-  doctest Topex
+  doctest Topex.HOTP
 
   test "Generates correct HOTP value from MAC" do
     # Taken from https://datatracker.ietf.org/doc/html/rfc4226#section-5.4
