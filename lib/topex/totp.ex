@@ -14,7 +14,7 @@ defmodule Topex.TOTP do
   end
 
   @spec code_from_decoded_key(key :: binary()) :: {:ok, String.t()} | {:error, {:encode, any()}}
-  defp code_from_decoded_key(key) do
+  def code_from_decoded_key(key) do
     counter = counter_value()
     case HOTP.hotp(key, counter, num_digits: @num_digits) do
       {:ok, hotp_val} ->
